@@ -1,7 +1,7 @@
 import os
 from dataclasses import dataclass
 
-# Optional local .env support (docker-compose env works without this)
+
 try:
     from dotenv import load_dotenv  # type: ignore
     load_dotenv()
@@ -103,11 +103,8 @@ def load_settings(strict: bool = True) -> Settings:
         ENABLE_CACHE=as_bool("ENABLE_CACHE", True),
     )
 
-
-# Default settings for runtime (strict in prod)
 settings = load_settings(strict=True)
 
-# Backwards-compatible module-level exports (so other files can `from rag.config import ...`)
 POSTGRES_DSN = settings.POSTGRES_DSN
 OPENAI_API_KEY = settings.OPENAI_API_KEY
 
