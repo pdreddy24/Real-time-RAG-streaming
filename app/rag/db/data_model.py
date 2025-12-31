@@ -1,4 +1,4 @@
-﻿# rag/db/data_model.py
+
 from __future__ import annotations
 
 import os
@@ -141,7 +141,7 @@ def _upsert_dims_and_fact(conn, chunks: List[ChunkRow]) -> int:
             if not c.content:
                 continue
             if c.kafka_topic is None or c.kafka_partition is None or c.kafka_offset is None:
-                # If you don't have offsets, this isn't a stable event row.
+                
                 continue
 
             kv = _parse_content(c.content)
@@ -221,7 +221,6 @@ def _upsert_dims_and_fact(conn, chunks: List[ChunkRow]) -> int:
                 ),
             )
 
-            # rowcount is not always reliable across drivers, but this usually works
             if cur.rowcount == 1:
                 inserted += 1
 
