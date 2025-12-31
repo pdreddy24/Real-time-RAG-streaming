@@ -1,0 +1,13 @@
+﻿FROM python:3.11-slim
+
+WORKDIR /app
+
+RUN apt-get update && apt-get install -y --no-install-recommends curl \
+  && rm -rf /var/lib/apt/lists/*
+
+COPY rag/producer/requirements.txt /tmp/requirements.txt
+RUN pip install --no-cache-dir --upgrade pip && pip install --no-cache-dir -r /tmp/requirements.txt
+
+COPY rag /app/rag
+
+CMD ["python", "-m", "rag.producer.wikimedia_sse_producer"]

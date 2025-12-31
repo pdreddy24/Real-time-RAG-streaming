@@ -1,0 +1,11 @@
+apiVersion: 1
+
+providers:
+  - name: "Wikimedia RAG"
+    orgId: 1
+    folder: "Wikimedia RAG"
+    type: file
+    disableDeletion: true
+    editable: true
+    options:
+      path: /var/lib/grafana/dashboards

@@ -1,0 +1,44 @@
+groups:
+  - name: rag-indexer-alerts
+    rules:
+      - alert: RagIndexerDown
+        expr: up{job="rag-indexer"} == 0
+        for: 30s
+        labels:
+          severity: critical
+        annotations:
+          summary: "rag-indexer is DOWN"
+          description: "Prometheus cannot scrape rag-indexer metrics endpoint."
+
+      - alert: RagIndexerNoProgress
+        # if last success is older than 5 minutes, you're dead in the water
+        expr: (time() - rag_indexer_last_success_unixtime) > 300
+        for: 1m
+        labels:
+          severity: critical
+        annotations:
+          summary: "rag-indexer not processing"
+          description: "No successful message processed in >5 minutes."
+
+      - alert: RagIndexerFailuresIncreasing
+        # failures rate > 0.1/min sustained
+        expr: rate(rag_indexer_failures_total[5m]) > (0.1/60)
+        for: 2m
+        labels:
+          severity: warning
+        annotations:
+          summary: "rag-indexer failures increasing"
+          description: "Processing failures are occurring (check logs + DB/OpenAI)."
+
+      - alert: RagIndexerLatencyP95High
+        expr: |
+          histogram_quantile(
+            0.95,
+            sum(rate(rag_indexer_processing_latency_seconds_bucket[5m])) by (le)
+          ) > 0.5
+        for: 3m
+        labels:
+          severity: warning
+        annotations:
+          summary: "rag-indexer p95 latency high"
+          description: "p95 processing latency > 0.5s for 3m."

@@ -1,0 +1,14 @@
+FROM python:3.11-slim
+
+WORKDIR /app
+
+RUN pip install --no-cache-dir --upgrade pip
+
+# If you have a shared requirements file, use that.
+# Otherwise keep producer deps minimal.
+COPY rag/producer/requirements.txt /tmp/requirements.txt
+RUN pip install --no-cache-dir -r /tmp/requirements.txt
+
+COPY rag /app/rag
+
+CMD ["python", "-m", "rag.producer"]

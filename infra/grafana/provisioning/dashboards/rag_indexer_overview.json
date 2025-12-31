@@ -1,0 +1,59 @@
+{
+  "id": null,
+  "uid": "rag-indexer",
+  "title": "RAG Indexer - Reliability Overview",
+  "schemaVersion": 39,
+  "version": 1,
+  "refresh": "10s",
+  "timezone": "browser",
+  "panels": [
+    {
+      "type": "timeseries",
+      "title": "Indexer UP (Prometheus target)",
+      "gridPos": { "x": 0, "y": 0, "w": 12, "h": 6 },
+      "targets": [
+        { "expr": "up{job=\"rag-indexer\"}", "refId": "A" }
+      ]
+    },
+    {
+      "type": "timeseries",
+      "title": "Processed rate (msgs/sec)",
+      "gridPos": { "x": 12, "y": 0, "w": 12, "h": 6 },
+      "targets": [
+        { "expr": "rate(rag_indexer_processed_total[1m])", "refId": "A" }
+      ]
+    },
+    {
+      "type": "timeseries",
+      "title": "Failures rate (per 5m)",
+      "gridPos": { "x": 0, "y": 6, "w": 12, "h": 6 },
+      "targets": [
+        { "expr": "increase(rag_indexer_failures_total[5m])", "refId": "A" }
+      ]
+    },
+    {
+      "type": "timeseries",
+      "title": "Processing latency p95 (seconds)",
+      "gridPos": { "x": 12, "y": 6, "w": 12, "h": 6 },
+      "targets": [
+        { "expr": "histogram_quantile(0.95, rate(rag_indexer_processing_latency_seconds_bucket[5m]))", "refId": "A" }
+      ]
+    },
+    {
+      "type": "stat",
+      "title": "Inflight",
+      "gridPos": { "x": 0, "y": 12, "w": 6, "h": 4 },
+      "targets": [
+        { "expr": "rag_indexer_inflight", "refId": "A" }
+      ]
+    },
+    {
+      "type": "stat",
+      "title": "Last success (unix)",
+      "gridPos": { "x": 6, "y": 12, "w": 6, "h": 4 },
+      "targets": [
+        { "expr": "rag_indexer_last_success_unixtime", "refId": "A" }
+      ]
+    }
+  ]
+}

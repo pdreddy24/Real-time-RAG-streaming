@@ -1,0 +1,20 @@
+# --- Kafka client (rdkafka) ---
+confluent-kafka>=2.4.0
+
+# --- OpenAI client ---
+openai>=1.40.0
+
+# --- Postgres ---
+psycopg[binary]>=3.1.18
+psycopg-pool>=3.2.3
+
+# --- Vector ---
+pgvector>=0.3.0
+
+# --- Utilities ---
+python-dotenv>=1.0.1
+pydantic>=2.7
+
+# --- Observability ---
+prometheus-client>=0.20.0
+

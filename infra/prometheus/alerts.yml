@@ -1,0 +1,29 @@
+groups:
+  - name: rag-indexer-alerts
+    rules:
+      - alert: RagIndexerDown
+        expr: up{job="rag-indexer"} == 0
+        for: 2m
+        labels:
+          severity: critical
+        annotations:
+          summary: "RAG indexer target is DOWN"
+          description: "Prometheus cannot scrape rag-indexer for 2 minutes."
+
+      - alert: RagIndexerFailures
+        expr: increase(rag_indexer_failures_total[5m]) > 0
+        for: 1m
+        labels:
+          severity: warning
+        annotations:
+          summary: "RAG indexer failures detected"
+          description: "Indexer failures increased in the last 5 minutes."
+
+      - alert: RagIndexerStalled
+        expr: increase(rag_indexer_processed_total[10m]) == 0
+        for: 10m
+        labels:
+          severity: warning
+        annotations:
+          summary: "RAG indexer appears stalled"
+          description: "No processed messages in 10 minutes."

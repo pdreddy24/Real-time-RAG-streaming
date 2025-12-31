@@ -1,0 +1,12 @@
+{
+  "name": "raw_event_wikimedia_v1",
+  "type": "object",
+  "properties": {
+    "type": { "type": ["string", "null"] },
+    "event": { "type": ["string", "null"] },
+    "title": { "type": ["string", "null"] },
+    "user": { "type": ["string", "null"] },
+    "timestamp": { "type": ["integer", "null"] }
+  },
+  "additionalProperties": true
+}

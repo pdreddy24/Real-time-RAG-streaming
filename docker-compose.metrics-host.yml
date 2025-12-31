@@ -1,0 +1,6 @@
+services:
+  wikimedia-rag-indexer:
+    ports:
+      - "9100:9100"
+    environment:
+      METRICS_PORT: "9100"

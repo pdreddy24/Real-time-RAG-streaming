@@ -1,0 +1,45 @@
+# -----------------------------
+# Core runtime
+# -----------------------------
+python-dotenv==1.0.1
+pydantic==2.10.4
+pydantic-settings==2.7.0
+
+# -----------------------------
+# API / Server (keep only if this service runs FastAPI)
+# -----------------------------
+fastapi==0.115.6
+uvicorn[standard]==0.34.0
+prometheus-client==0.21.1
+
+# -----------------------------
+# Kafka (Redpanda)
+# -----------------------------
+confluent-kafka==2.6.1
+
+# -----------------------------
+# Postgres / pgvector (psycopg3)
+# -----------------------------
+psycopg[binary]==3.2.3
+psycopg-pool==3.2.4
+pgvector==0.3.6
+
+# -----------------------------
+# Embeddings / ML
+# -----------------------------
+numpy==2.1.3
+scikit-learn==1.5.2
+sentence-transformers==3.3.1
+torch==2.5.1
+
+# -----------------------------
+# OpenAI (required only because your code imports rag.openai_client)
+# -----------------------------
+openai==1.57.4
+
+# -----------------------------
+# Utilities
+# -----------------------------
+requests==2.32.3
+tenacity==9.0.0
+requests>=2.31.0

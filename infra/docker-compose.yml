@@ -1,0 +1,138 @@
+﻿services:
+  # -----------------------
+  # Redpanda (Kafka-compatible broker)
+  # -----------------------
+  wikimedia-redpanda:
+    image: docker.redpanda.com/redpandadata/redpanda:v24.3.6
+    hostname: wikimedia-redpanda
+    command:
+      - redpanda
+      - start
+      - --overprovisioned
+      - --smp
+      - "1"
+      - --memory
+      - "1G"
+      - --reserve-memory
+      - "0M"
+      - --kafka-addr
+      - PLAINTEXT://0.0.0.0:9092,OUTSIDE://0.0.0.0:29092
+      - --advertise-kafka-addr
+      - PLAINTEXT://wikimedia-redpanda:9092,OUTSIDE://host.docker.internal:29092
+    ports:
+      - "29092:29092"   # host access (OUTSIDE)
+      - "9644:9644"     # admin API (so you can curl localhost:9644)
+    volumes:
+      - redpanda_data:/var/lib/redpanda/data
+    healthcheck:
+      test: ["CMD-SHELL", "rpk cluster info -X brokers=localhost:9092 >/dev/null 2>&1 || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 30
+      start_period: 20s
+    networks:
+      - wikimedia-net
+
+  # -----------------------
+  # Create topic(s) once Redpanda is healthy
+  # -----------------------
+  redpanda-init:
+    image: docker.redpanda.com/redpandadata/redpanda:v24.3.6
+    depends_on:
+      wikimedia-redpanda:
+        condition: service_healthy
+    entrypoint: ["/bin/sh", "-lc"]
+    command: |
+      set -e
+      rpk topic create wikimedia.cleaned -p 3 -r 1 -X brokers=wikimedia-redpanda:9092 || true
+      rpk topic describe wikimedia.cleaned -X brokers=wikimedia-redpanda:9092
+      echo "redpanda-init done"
+    restart: "no"
+    networks:
+      - wikimedia-net
+
+  # -----------------------
+  # Kafka Exporter (Prometheus)
+  # -----------------------
+  kafka-exporter:
+    image: danielqsj/kafka-exporter:v1.7.0
+    command:
+      - --kafka.server=wikimedia-redpanda:9092
+    depends_on:
+      wikimedia-redpanda:
+        condition: service_healthy
+    networks:
+      - wikimedia-net
+
+  # -----------------------
+  # Postgres Exporter (Prometheus)
+  # NOTE: expects your app DB container is named/service-hosted as "wikimedia-postgres" on wikimedia-net
+  # -----------------------
+  postgres-exporter:
+    image: prometheuscommunity/postgres-exporter:v0.15.0
+    environment:
+      DATA_SOURCE_NAME: "postgresql://postgres:postgres@wikimedia-postgres:5432/postgres?sslmode=disable"
+    networks:
+      - wikimedia-net
+
+  # -----------------------
+  # cAdvisor (container metrics)
+  # -----------------------
+  cadvisor:
+    image: gcr.io/cadvisor/cadvisor:v0.49.1
+    privileged: true
+    volumes:
+      - /:/rootfs:ro
+      - /sys:/sys:ro
+      - /var/lib/docker/:/var/lib/docker:ro
+      - /var/run/docker.sock:/var/run/docker.sock:rw
+    networks:
+      - wikimedia-net
+
+  # -----------------------
+  # Prometheus
+  # -----------------------
+  prometheus:
+    image: prom/prometheus:v2.53.1
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - prometheus_data:/prometheus
+    command:
+      - --config.file=/etc/prometheus/prometheus.yml
+      - --storage.tsdb.path=/prometheus
+    depends_on:
+      - cadvisor
+      - kafka-exporter
+      - postgres-exporter
+    networks:
+      - wikimedia-net
+
+  # -----------------------
+  # Grafana
+  # -----------------------
+  grafana:
+    image: grafana/grafana:11.3.0
+    ports:
+      - "3000:3000"
+    environment:
+      GF_SECURITY_ADMIN_USER: admin
+      GF_SECURITY_ADMIN_PASSWORD: admin
+      GF_USERS_ALLOW_SIGN_UP: "false"
+    volumes:
+      - grafana_data:/var/lib/grafana
+    depends_on:
+      - prometheus
+    networks:
+      - wikimedia-net
+
+volumes:
+  redpanda_data:
+  prometheus_data:
+  grafana_data:
+
+networks:
+  wikimedia-net:
+    external: true
+    name: wikimedia-net
