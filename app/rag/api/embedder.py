@@ -7,13 +7,11 @@ from fastembed import TextEmbedding
 
 logger = logging.getLogger(__name__)
 
-# Requested model (can be overridden)
+
 REQUESTED_MODEL = os.getenv("FASTEMBED_MODEL", "BAAI/bge-small-en-v1.5")
 
-# Cache path (mount this as a Docker volume for stability)
 FASTEMBED_CACHE_PATH = os.getenv("FASTEMBED_CACHE_PATH", "/app/.cache/fastembed")
 
-# One embedder per process
 _embedder: Optional[TextEmbedding] = None
 _supported_models: Optional[set] = None
 
@@ -45,13 +43,11 @@ def _pick_supported_model(requested: str) -> str:
     if requested in _supported_models:
         return requested
 
-    # Practical fallback: small + widely available in fastembed builds
     fallback = "sentence-transformers/all-MiniLM-L6-v2"
     if fallback in _supported_models:
         logger.warning("FASTEMBED_MODEL '%s' not supported. Falling back to '%s'.", requested, fallback)
         return fallback
 
-    # Last resort: first supported model
     first = next(iter(_supported_models))
     logger.warning("FASTEMBED_MODEL '%s' not supported. Falling back to '%s'.", requested, first)
     return first
@@ -69,7 +65,6 @@ def get_embedder() -> TextEmbedding:
     if _embedder is not None:
         return _embedder
 
-    # Ensure cache env is set BEFORE initialization
     os.environ["FASTEMBED_CACHE_PATH"] = FASTEMBED_CACHE_PATH
 
     model_name = _pick_supported_model(REQUESTED_MODEL)
@@ -82,7 +77,7 @@ def get_embedder() -> TextEmbedding:
 def embed_text(text: str) -> List[float]:
     text = (text or "").strip()
     if not text:
-        # Hard opinion: fail fast; empty embeddings create garbage rows
+      
         raise ValueError("embed_text() received empty text")
 
     emb = get_embedder()
