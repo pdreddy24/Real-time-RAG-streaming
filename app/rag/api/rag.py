@@ -48,7 +48,7 @@ def retrieve(
     if minutes is not None and minutes > 0:
         cutoff = datetime.now(timezone.utc) - timedelta(minutes=minutes)
 
-        # robust conversion: avoids query-killing cast errors if any bad event_time sneaks in
+        
         event_time_expr = """
         CASE
           WHEN (metadata->>'event_time') IS NULL OR (metadata->>'event_time') = '' THEN NULL
