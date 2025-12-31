@@ -17,10 +17,9 @@ from rag.observability.metrics_fastapi import instrument_fastapi
 
 
 def dsn_from_env() -> str:
-    # supports either POSTGRES_DSN or DATABASE_URL
     dsn = os.getenv("POSTGRES_DSN") or os.getenv("DATABASE_URL")
     if not dsn:
-        # fall back to the docker env pattern you already use
+        
         dsn = os.getenv("POSTGRES_DSN_DOCKER") or "postgresql://postgres:postgres@wikimedia-postgres:5432/postgres"
     return dsn
 
@@ -105,8 +104,6 @@ def query(req: QueryRequest) -> QueryResponse:
     rows = query_chunks(embedding, req.top_k)
     results = [QueryResult(**r) for r in rows]
 
-    # Tell it like it is: your stored "content" is edit metadata, not the full article text.
-    # So answering detailed questions is usually impossible without fetching Wikipedia page text.
     answer = (
         "This system retrieves *recent edit metadata* (title/user/comment/etc). "
         "It does not store full article text, so detailed Q&A is often not possible from this context alone."
