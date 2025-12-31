@@ -1,4 +1,4 @@
-# rag/db/bootstrap.py
+
 from __future__ import annotations
 
 import os
@@ -12,7 +12,7 @@ def connect_postgres(dsn: str) -> psycopg.Connection:
     One connection, properly configured for pgvector.
     """
     conn = psycopg.connect(dsn)
-    register_vector(conn)  # critical: avoids vector <=> double precision[] issues
+    register_vector(conn) 
     conn.execute("SET statement_timeout = '30s'")
     return conn
 
